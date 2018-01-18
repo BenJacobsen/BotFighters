@@ -10,6 +10,9 @@ Controls are inputted by WASD keys and are entered through cmd line, input 'x' t
 Board is displayed by printing on to the cmd line.
 
 Changes to be made:
+
 Making controls read automatically instead of manually inputted 
+
 Using a proper display interface instead of printing onto cmd line, possibly in 3D 
+
 Creating a AI to play against for single-player
