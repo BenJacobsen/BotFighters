@@ -1,6 +1,5 @@
 #include "Bot.h"
 
-enum SquareState { BOT1SPOT, BOT2SPOT, GAINPOINTS, LOSEHEALTH, EMPTY };
 using namespace std;
 struct square{
     SquareState state;
@@ -8,19 +7,19 @@ struct square{
 
 class Grid {
 public:
-  void botupdate(bot bot, dir botd);
-  void applysquare(bot abot);
-  bool closecheck(coor, coor);
-  void display();
-  Bot[] endChecker();
-  squarestate randoms();
-  Grid(int);
+
+    void botupdate(bot bot, dir botd);
+    void applysquare(bot abot);
+    bool closecheck(coor, coor);
+    void display();
+    squarestate randoms();
+    Grid(int);
+    Bot player1;
+    Bot player2;
 private:
     square getBotSquare(Bot);
     int size;
-    Grid[][] GridForm;
-    Bot player1;
-    Bot player2;
+    Grid[][] grid_form;
 };
 
 void Grid::Grid(int inputsize) {
@@ -31,20 +30,91 @@ void Grid::Grid(int inputsize) {
     for (int row = 0; row < this.size; row++) {
         square* squareRow = new Square [this.size];
         for (int col = 0; col < this.size; col++) {
-            squareRow[col].state = (rand() % 3) ? generateState() : EMPTY;
+            squareRow[col].state = (rand() % 3) ? ((rand() % 2) ? GAINPOINTS : LOSEHEALTH) : EMPTY;
         }
         GridForm[row] = squareRow;
     }
 
-    player1 = new Bot(generateCoordinates());
-    getBotSquare(player1).state = BOT1SPOT;  //creates random spot for P1
+    Player1 = new Bot(generateCoordinates());
+    getBotSquare(Player1).state = BOT1SPOT;  //creates random spot for P1
     coor secondCoors = generateCoordinates();
     while(closeCheck(bot1.botpos, secondCoors)) {
         secondCoors = generateCoordinates();  //checks if P2 spot is too close to P1 and if so, try new spot
     }
-    player2 = new Bot(secondCoors);
-    getBotSquare(player2).state = BOT2SPOT;
+    Player2 = new Bot(secondCoors);
+    getBotSquare(Player2).state = BOT2SPOT;
 
+}
+
+void Grid::botupdate(bot bot, char dir) {   //updated the bot's position, and the game Grid
+  if(bot.bottag == 1) {
+    if(botd == UP) {
+      if(Grid.Player1.botpos.rpos == 0) {
+        return;
+      }
+      row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state = EMPTY;
+      Grid.Player1.botpos.rpos--;
+    }
+    if(botd == DOWN) {
+      if(Grid.Player1.botpos.rpos == bsize-1) {
+        return;
+      }
+      row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state = EMPTY;
+      Grid.Player1.botpos.rpos++;
+    }
+    if(botd == LEFT) {
+      if(Grid.Player1.botpos.cpos == 0) {
+        return;
+      }
+      row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state = EMPTY;
+      Grid.Player1.botpos.cpos--;
+    }
+    if(botd == RIGHT) {
+      if(Grid.Player1.botpos.cpos == bsize-1) {
+        return;
+      }
+      row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state = EMPTY;
+      Grid.Player1.botpos.cpos++;
+    }
+    if(botd == NONE) {
+      return;
+    }
+    applysquare(Grid.Player1);
+
+  }
+  if(bot.bottag == 2) {
+    if(botd == UP) {
+      if(Grid.Player2.botpos.rpos == 0) {
+        return;
+      }
+      row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state = EMPTY;
+      Grid.Player2.botpos.rpos--;
+    }
+    if(botd == DOWN) {
+      if(Grid.Player2.botpos.rpos == bsize-1) {
+        return;
+      }
+      row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state = EMPTY;
+      Grid.Player2.botpos.rpos++;
+    }
+    if(botd == LEFT) {
+      if(Grid.Player2.botpos.cpos == 0) {
+        return;
+      }
+      row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state = EMPTY;
+      Grid.Player2.botpos.cpos--;
+    }
+    if(botd == RIGHT) {
+      if(Grid.Player2.botpos.cpos == bsize-1) {
+        return;
+      }
+      row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state = EMPTY;
+      Grid.Player2.botpos.cpos++;
+    }
+    applysquare(Grid.Player2);
+
+
+  }
 }
 
 void Grid::display() {   //displays the entire Grid
@@ -139,16 +209,6 @@ coor generateCoordinates () {
 
     return coor newCoor = {rand() % this.size, rand() % this.size};
 
-}
-
-SquareState generateState () {  //random creates a square type for mystery bonus
-  int x = rand() % 2;
-  if(x == 0){
-    return GAINPOINTS;
-  }
-  if(x == 1){
-    return LOSEHEALTH;
-  }
 }
 
 bool closeCheck(coor coor1, coor coor2){ //checkes to see that bots are at least 5 squares apart
