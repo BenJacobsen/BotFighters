@@ -2,6 +2,10 @@ class Bot{
 friend class Grid;
 public:
     Bot();
+    int health();
+    int points();
+    coor coors();
+private:
     int bot_health;
     int bot_points;
     coor bot_coors;
@@ -21,6 +25,6 @@ int Bot::points() {
     return bot_points;
 };
 
-int Bot::coors() {
+coor Bot::coors() {
     return bot_coors;
 }

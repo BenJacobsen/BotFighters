@@ -8,9 +8,9 @@ struct square{
 class Grid {
 public:
 
-    void botupdate(bot bot, dir botd);
-    void applysquare(bot abot);
-    bool closecheck(coor, coor);
+    void bot_update(bot bot, dir botd);
+    void apply_square(bot abot);
+    bool close_check(coor, coor);
     void display();
     squarestate randoms();
     Grid(int);
@@ -46,7 +46,7 @@ void Grid::Grid(int inputsize) {
 
 }
 
-void Grid::botupdate(bot bot, char dir) {   //updated the bot's position, and the game Grid
+void Grid::bot_update(Bot bot, char dir) {   //updated the bot's position, and the game Grid
   if(bot.bottag == 1) {
     if(botd == UP) {
       if(Grid.Player1.botpos.rpos == 0) {
@@ -115,6 +115,37 @@ void Grid::botupdate(bot bot, char dir) {   //updated the bot's position, and th
 
 
   }
+}
+
+void Grid::applysquare(bot abot) {    //applies changes to points and health of bots based on square
+  if(abot.bottag == 1) {
+    if(row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state == EMPTY) {
+      return;
+    }
+
+    if(row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state == GAINPOINTS) {
+      Grid.Player1.points++;
+      return;
+    }
+    if(row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state == LOSEHEALTH) {
+      Grid.Player2.health -= 10;
+      return;
+    }
+  }
+  if(abot.bottag == 2) {
+    if(row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state == EMPTY) {
+      return;
+    }
+    if(row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state == GAINPOINTS) {
+      Grid.Player2.points++;
+      return;
+    }
+    if(row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state == LOSEHEALTH) {
+      Grid.Player1.health -= 10;
+      return;
+    }
+  }
+
 }
 
 void Grid::display() {   //displays the entire Grid

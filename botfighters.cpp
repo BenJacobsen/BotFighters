@@ -1,9 +1,11 @@
 #include <iostream>
 #include <stdlib.h>
 #include <math.h>
+#include "Grid.h"
+
 using namespace std;
 enum results { P1, P2, TIE, EXIT, NONE };
-enum Move { UP, DOWN, LEFT, RIGHT, NONE };
+enum Move { UP, DOWN, LEFT, RIGHT, STAY, END };
 
 struct coor{
   int row;
@@ -17,7 +19,7 @@ const map<char, Move> move_lookup {
   {"s", LEFT},
   {"d", RIGHT},
   {"x", END},
-  {"z", NONE}
+  {"z", STAY}
 };
 
 Move get_move() {
@@ -32,26 +34,25 @@ Move get_move() {
   get_move();
 }
 
-void Grid::turn() {
+void turn(Grid grid) {
   cout << "PLAYER 1's MOVE:" << endl;   //gets keys for bot's move
   Move p1_move = get_move();
   cout << "PLAYER 2's MOVE:" << endl;
   Move p2_move = get_move();
 
-  bot_update(grid.player1 p1_move);   //update the postions of the bots
-  bot_update(Grid.player2, p2_move);
+  grid.bot_update(grid.player1, p1_move);   //update the postions of the bots
+  grid.bot_update(grid.player2, p2_move);
 
-  display();
 }
-result is_game_over() {   //checks conditions to see if game is over, and if so, who won
+results check_results(Grid & grid, int num_turns) {   //checks conditions to see if game is over, and if so, who won
 
-  results result = None;
+  results result = NONE;
 
-  if(turncount == 60 || (Grid.Player1.coors() == Grid.Player2.coors())) {
-    if(Grid.Player1.points() > Grid.Player2.points()) {
+  if(num_turns == 60 || (grid.player1.coors() == grid.player2.coors())) {
+    if(grid.player1.points() > grid.player2.points()) {
       result = P1;
     }
-    if(Grid.Player2.points() > Grid.Player1.points()) {
+    if(grid.player2.points() > grid.player1.points()) {
       result = P2;
     }
     else{
@@ -59,67 +60,12 @@ result is_game_over() {   //checks conditions to see if game is over, and if so,
     }
   }
 
-  result = if (Grid.Player1.health() <= 0) result = P1;
-  result = if (Grid.Player2.health() <= 0) result = P2;
-  result = if (Grid.Player1.health() <= 0 && Grid.Player2.health() <= 0) result = TIE;
+  result = (grid.player1.health() <= 0) ? P2 : result;
+  result = (grid.player2.health() <= 0) ? P1 : result;
+  result = (grid.player1.health() <= 0 && grid.player2.health() <= 0) ? TIE : result;
 
 
   return result;
-}
-
-void Grid::applysquare(bot abot) {    //applies changes to points and health of bots based on square
-  if(abot.bottag == 1) {
-    if(row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state == EMPTY) {
-      return;
-    }
-
-    if(row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state == GAINPOINTS) {
-      Grid.Player1.points++;
-      return;
-    }
-    if(row[Grid.Player1.botpos.rpos].col[Grid.Player1.botpos.cpos].state == LOSEHEALTH) {
-      Grid.Player2.health -= 10;
-      return;
-    }
-  }
-  if(abot.bottag == 2) {
-    if(row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state == EMPTY) {
-      return;
-    }
-    if(row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state == GAINPOINTS) {
-      Grid.Player2.points++;
-      return;
-    }
-    if(row[Grid.Player2.botpos.rpos].col[Grid.Player2.botpos.cpos].state == LOSEHEALTH) {
-      Grid.Player1.health -= 10;
-      return;
-    }
-  }
-
-}
-
-void Grid::start() {
-
-  turncount = 0;
-
-  while(!ended) { //checks if game ends and if not, do another turn
-    turn();
-    ++turncount;
-    endcheck();
-  }
-  if(result == Grid.Player1) {
-    cout << "--------PLAYER 1 WINS-----------" << endl;
-  }
-  if(result == Grid.Player2) {
-    cout << "--------PLAYER 2 WINS-----------" << endl;
-  }
-
-  if(result == TIE) {
-    cout << "--------TIE GAME-----------" << endl;
-  }
-  if(result == EXIT) {
-    cout << "GAME ABANDONED" << endl;
-  }
 }
 
 int main(const int argc, const char* const argv[]) {
@@ -134,15 +80,37 @@ int main(const int argc, const char* const argv[]) {
     cin >> size;
   }
 
-  Grid gameGrid = new Grid(size);
+  Grid* grid = new Grid(size);
 
   int turncount = 0;
+  results result = NONE;
 
-  while(endchecker()) { //checks if game ends and if not, do another turn
-    gameGrid.display();
-    turn();
+  while(result == NONE) { //checks if game ends and if not, do another turn
+    cout << "PLAYER 1's MOVE:" << endl;   //gets keys for bot's move
+    Move p1_move = get_move();
+    cout << "PLAYER 2's MOVE:" << endl;
+    Move p2_move = get_move();
+
+    grid->bot_update(grid->player1, p1_move);   //update the postions of the bots
+    grid->bot_update(grid->player2, p2_move);
+
     ++turncount;
-    endchecker();
+    result = check_results(*grid, turncount);
+  }
+
+  switch (result)
+  {
+  case P1:
+    cout << "--------PLAYER 1 WINS-----------" << endl;
+    break;
+
+  case P2:
+    cout << "--------PLAYER 2 WINS-----------" << endl;
+    break;
+  
+  default:
+      cout << "--------TIE GAME-----------" << endl;
+    break;
   }
 
 	return 0;
